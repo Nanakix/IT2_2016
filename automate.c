@@ -35,14 +35,25 @@
 #include <math.h>
 
 
+
+void action_get_max_etat( const intptr_t element, void* data ){
+	int * max = (int*) data;
+	if( *max < element ) *max = element;
+}
+
 int get_max_etat( const Automate* automate ){
-	A_FAIRE_RETURN( 0 );
+	int max = INT_MIN;
+
+	pour_tout_element( automate->etats, action_get_max_etat, &max );
+
+	return max;
 }
 
 void action_get_min_etat( const intptr_t element, void* data ){
 	int * min = (int*) data;
 	if( *min > element ) *min = element;
 }
+
 
 int get_min_etat( const Automate* automate ){
 	int min = INT_MAX;
@@ -471,18 +482,94 @@ Automate * mot_to_automate( const char * mot ){
 	return automate;
 }
 
+// Ajout de transitions dans l'automate de l'union
+void ajout_transition_dans_union(int origine, char lettre, int fin, void* data ){
+	
+	ajouter_transition(data, origine, lettre, fin);
+	
+}
+
 Automate * creer_union_des_automates(
 	const Automate * automate_1, const Automate * automate_2
-){
-	A_FAIRE_RETURN( NULL );
+){ 
+	
+	// Copie de A1 dans union, et translation de A2 pour éviter conflits d'états
+	Automate * auto_union = copier_automate(automate_1);
+	Automate * tmp = translater_automate(automate_2, auto_union);
+	
+	// ajout des états de A2 dans union
+	Ensemble_iterateur it;
+	for( it = premier_iterateur_ensemble (get_etats(tmp)) ;
+		 ! iterateur_ensemble_est_vide(it);
+		 it = iterateur_suivant_ensemble (it)) 
+	{
+		ajouter_etat(auto_union, get_element(it));
+			
+		if (est_un_etat_initial_de_l_automate(tmp,get_element(it)))
+			ajouter_etat_initial(auto_union,get_element(it));
+	
+		if (est_un_etat_final_de_l_automate(tmp,get_element(it)))
+			ajouter_etat_final(auto_union,get_element(it));
+				
+	}
+	
+	// ajout des transitions de A2 dans union
+	pour_toute_transition(tmp, ajout_transition_dans_union, auto_union);
+	
+	return auto_union;	
 }
 
 Ensemble* etats_accessibles( const Automate * automate, int etat ){
-	A_FAIRE_RETURN( NULL ); 
+	Ensemble* access = creer_ensemble(NULL,NULL,NULL);
+	const Ensemble* alphabet = get_alphabet(automate);
+	
+	Ensemble_iterateur it_access = premier_iterateur_ensemble(access);
+	Ensemble_iterateur it_alphabet;
+	
+	// on ajoute dans access les états accessibles directement depuis etat
+	for (it_alphabet = premier_iterateur_ensemble(alphabet);
+	! iterateur_ensemble_est_vide(it_alphabet);
+	it_alphabet = iterateur_suivant_ensemble(it_alphabet))
+	{
+		ajouter_elements(access, delta1(automate, etat, get_element(it_alphabet)));
+	} 
+	
+	// pour chaque état de access, on ajoute le delta1 de cet état pour toute lettre de l'alphabet
+	for (it_access = premier_iterateur_ensemble(access) ;
+	!iterateur_ensemble_est_vide(it_access);
+	it_access = iterateur_suivant_ensemble(it_access))
+	{
+		
+		for (it_alphabet = premier_iterateur_ensemble(alphabet);
+			! iterateur_ensemble_est_vide(it_alphabet);
+			it_alphabet = iterateur_suivant_ensemble(it_alphabet))
+		{
+			
+			ajouter_elements(access, 
+							delta1(automate,
+								get_element(it_access),
+								get_element(it_alphabet)));
+		} 
+	} 
+	
+	return access;
 }
 
 Ensemble* accessibles( const Automate * automate ){
-	A_FAIRE_RETURN( NULL ); 
+	// pour chaque état initial
+	// etat_accessible (aut, etat_i)
+	Ensemble* access = creer_ensemble(NULL,NULL,NULL);
+	const Ensemble* initiaux = get_initiaux(automate);
+	Ensemble_iterateur it_access;
+	
+	for (it_access = premier_iterateur_ensemble(initiaux) ;
+	!iterateur_ensemble_est_vide(it_access);
+	it_access = iterateur_suivant_ensemble(it_access))
+	{
+		ajouter_elements(access, etats_accessibles(automate ,get_element(it_access)));
+	}
+	
+	return access;
 }
 
 Automate *automate_accessible( const Automate * automate ){

@@ -287,7 +287,7 @@ int le_mot_est_reconnu( const Automate* automate, const char* mot );
  * La fonction qui sera executée (et qui a été passée en paramètre), doit 
  * posséder l'en-tête suivante :
  *   void NOM_FONCTION( int origine, char lettre, int fin, void* data );
- * Les pramètres 'origine', 'lettre' et 'fin' correspondent à l'origine, la 
+ * Les paramètres 'origine', 'lettre' et 'fin' correspondent à l'origine, la 
  * lettre et la fin de la transitions en cours de parcours.
  * Le paramètre 'data' est un pointeur qui sera identique à celui passé par le
  * paramètre 'data' de la fonction pour_toute_transition().
