@@ -573,6 +573,14 @@ Ensemble* accessibles( const Automate * automate ){
 	return access;
 }
 
+void ajout_transition_accessible(int origine, char lettre, int fin, void* data) {
+
+	if (est_un_etat_de_l_automate(data, origine))
+	{
+		ajouter_transition(data, origine, lettre, fin);
+	}
+} 
+
 Automate *automate_accessible( const Automate * automate ){
 	Automate * res = creer_automate();
 	Ensemble * access = accessibles(automate);
@@ -581,29 +589,25 @@ Automate *automate_accessible( const Automate * automate ){
 	//recopier les états accessibles dans res
 	for(it_access = premier_iterateur_ensemble(access);
 		!  iterateur_ensemble_est_vide(it_access);
-		it = iterateur_suivant_ensemble(it)
+		it_access = iterateur_suivant_ensemble(it_access)
 		)
 	{
-		ajouter_etat(res, get_element(it));
+		ajouter_etat(res, get_element(it_access));
 		// initiaux accessibles
-		if (est_un_etat_initial_de_l_automate(automate, get_element(it)))
+		if (est_un_etat_initial_de_l_automate(automate, get_element(it_access)))
 		{
-			ajouter_etat_initial(res, get_element(it));
+			ajouter_etat_initial(res, get_element(it_access));
 		}
 		// finaux accessibles
-		if (est_un_etat_final_de_l_automate(automate, get_element(it)))
+		if (est_un_etat_final_de_l_automate(automate, get_element(it_access)))
 		{
-			ajouter_etat_final(res, get_element(it));
+			ajouter_etat_final(res, get_element(it_access));
 		}		
 	}
-	
-	pour_toute_transition(automate, ajout_transition_accessible,
-	// si la transition comporte un état qui n'est pas accessible, on ne l'ajoute pas
-	
-	
-	
-	
-	
+	// chaque transition dont l'origine est dans res doit être ajoutée car elle est accessible.
+	pour_toute_transition(automate, ajout_transition_accessible, res);
+		
+	return res;	
 }
 
 Automate *miroir( const Automate * automate){
