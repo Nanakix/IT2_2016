@@ -610,14 +610,77 @@ Automate *automate_accessible( const Automate * automate ){
 	return res;	
 }
 
-Automate *miroir( const Automate * automate){
-	A_FAIRE_RETURN( NULL ); 
+void ajout_transition_miroir(int origine, char lettre, int fin, void* data) {
+	ajouter_transition(data, fin, lettre, origine);
+} 
+
+Automate * miroir( const Automate * automate){
+
+	Automate * res = creer_automate();
+	
+	Ensemble_iterateur it_miroir;
+	
+	//recopier les états 
+	for(it_miroir = premier_iterateur_ensemble(get_etats(automate));
+		!  iterateur_ensemble_est_vide(it_miroir);
+		it_miroir = iterateur_suivant_ensemble(it_miroir)
+		)
+	{
+		ajouter_etat(res, get_element(it_miroir));
+		// placer initiaux de automate dans les finaux de res
+		if (est_un_etat_initial_de_l_automate(automate, get_element(it_miroir)))
+		{
+			ajouter_etat_final(res, get_element(it_miroir));
+		}
+		// placer finaux de automate dans les initiaux de res
+		if (est_un_etat_final_de_l_automate(automate, get_element(it_miroir)))
+		{
+			ajouter_etat_initial(res, get_element(it_miroir));
+		}		
+	}
+	
+	pour_toute_transition(automate, ajout_transition_miroir, res);
+	return res;
 }
 
 Automate * creer_automate_du_melange(
 	const Automate* automate_1,  const Automate* automate_2
 ){
-	A_FAIRE_RETURN( NULL ); 
+	Automate * res = creer_automate();
+	// on récupère les états de nos deux automates pour en faire des couples
+	Ensemble_iterateur it_a1, it_a2;
+	typdef struct { int x; int y; } Couple;   // On définit le couple
+	Table * t = creer_table( NULL; NULL, NULL );
+	int cpt=0;
+	
+	for(it_a1 = premier_iterateur_ensemble(get_etats(automate_1));
+		! iterateur_ensemble_est_vide(it_a1);
+		it_a1 = iterateur_suivant_ensemble(it_a1)
+	{
+		for(it_a2 = premier_iterateur_ensemble(get_etats(automate_2));
+		! iterateur_ensemble_est_vide(it_a2);
+		it_a2 = iterateur_suivant_ensemble(it_a2)
+		{
+			Couple * c = malloc( sizeof(Couple) );       // On crée une valeur
+			c.x = get_element(it_a1);
+			c.y = get_element(it_a2);
+			add_table(t, (intptr_t) c);
+			ajouter_etat(res,cpt);
+			if (est_un_etat_initial_de_l_automate(automate_1, c.x) && est_un_etat_initial_de_l_automate(automate_2 , c.y))
+			{
+				ajouter_etat_initial(res,cpt);
+			}
+			if (est_un_etat_final_de_l_automate(automate_1, c.x) && est_un_etat_final_de_l_automate(automate_2 , c.y))
+			{
+				ajouter_etat_final(res,cpt);
+			}
+			cpt++;
+		}	
+	}
+	
+	// PTT CF schéma
+	
+	
 }
 
 Automate * creer_automate_deterministe( const Automate* automate ){

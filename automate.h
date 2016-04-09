@@ -399,7 +399,7 @@ Automate *automate_accessible( const Automate * automate );
   * 
   * Crée un nouvel automate qui reconnaît les mots w tels que w est le mélange de
   * deux mots w1 et w2 appartenant respectivement aux langages reconnus par
-  * l'automate 1 et par l'autoamte 2 passés en paramètre.
+  * l'automate 1 et par l'automate 2 passés en paramètre.
   *
   * On peut définir le mélange récursivement par :
   *     melange( a.w1, b.W2 ) := a.melange( w1, b.w2 ) + b.melange( a.w1, w2 )
@@ -436,6 +436,14 @@ void print_automate( const Automate * automate );
 Automate * creer_union_des_automates(
 	const Automate * automate_1, const Automate * automate_2
 );
+/**
+ * @brief Il s'agit d'un automate qui reconnaît les mots renversés 
+ * du langage associé à l'automate passé en paramètre .
+ *
+ * @param automate Un automate.
+ * @return L'automate miroir.
+ */
+Automate * miroir( const Automate * automate);
 
 /**
  * @brief @todo Renvoie l'automate déterministe.
