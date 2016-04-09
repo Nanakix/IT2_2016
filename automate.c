@@ -562,6 +562,7 @@ Ensemble* accessibles( const Automate * automate ){
 	const Ensemble* initiaux = get_initiaux(automate);
 	Ensemble_iterateur it_access;
 	
+	// puis on les ajoute dans access
 	for (it_access = premier_iterateur_ensemble(initiaux) ;
 	!iterateur_ensemble_est_vide(it_access);
 	it_access = iterateur_suivant_ensemble(it_access))
@@ -573,7 +574,36 @@ Ensemble* accessibles( const Automate * automate ){
 }
 
 Automate *automate_accessible( const Automate * automate ){
-	A_FAIRE_RETURN( NULL ); 
+	Automate * res = creer_automate();
+	Ensemble * access = accessibles(automate);
+	Ensemble_iterateur it_access;
+	
+	//recopier les états accessibles dans res
+	for(it_access = premier_iterateur_ensemble(access);
+		!  iterateur_ensemble_est_vide(it_access);
+		it = iterateur_suivant_ensemble(it)
+		)
+	{
+		ajouter_etat(res, get_element(it));
+		// initiaux accessibles
+		if (est_un_etat_initial_de_l_automate(automate, get_element(it)))
+		{
+			ajouter_etat_initial(res, get_element(it));
+		}
+		// finaux accessibles
+		if (est_un_etat_final_de_l_automate(automate, get_element(it)))
+		{
+			ajouter_etat_final(res, get_element(it));
+		}		
+	}
+	
+	pour_toute_transition(automate, ajout_transition_accessible,
+	// si la transition comporte un état qui n'est pas accessible, on ne l'ajoute pas
+	
+	
+	
+	
+	
 }
 
 Automate *miroir( const Automate * automate){
